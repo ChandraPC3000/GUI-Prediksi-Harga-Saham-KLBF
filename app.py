@@ -11,11 +11,13 @@ st.markdown("""
     text-align: left;
     margin-left: 50px;
     margin-top: 20px;
+    line-height: 1.8; /* Adjust spacing for better readability */
 }
 .right {
     text-align: right;
     margin-right: 50px;
     margin-top: 20px;
+    line-height: 1.8; /* Adjust spacing for better readability */
 }
 .space-below {
     margin-bottom: 5px;
@@ -39,13 +41,13 @@ with col3:
 st.markdown('<h1 class="center">Prediksi Harga Saham PT Kalbe Farma Tbk (KLBF) Menggunakan Metode XGBoost dan LSTM</h1>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below">Oleh:</p>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below"><b>Chandra Putra Ciptaningtyas</b></p>', unsafe_allow_html=True)
-st.markdown('<p class="center">NIM. 24050121140106</p>', unsafe_allow_html=True)
+st.markdown('<p class="center">NIM: 123456789</p>', unsafe_allow_html=True)
 
 # Display dosen pembimbing information
 col_left, col_right = st.columns([1, 1])
 
 with col_left:
-    st.markdown('<p class="left"><b>Dosen Pembimbing 1:</b><br>Dr. Triastuti Wuryandari, S.Si., M.Si.<br><i>NIP. 197109061998032001</i></p>', unsafe_allow_html=True)
+    st.markdown('<p class="left"><b>Dosen Pembimbing 1:</b><br><br>Dr. Triastuti Wuryandari, S.Si., M.Si.<br>NIP. 197109061998032001</p>', unsafe_allow_html=True)
 
 with col_right:
-    st.markdown('<p class="right"><b>Dosen Pembimbing 2:</b><br>Miftahul Jannah, S.Si., M.Si.<br><i>NIP. H.7.199804242023072001</i></p>', unsafe_allow_html=True)
+    st.markdown('<p class="right"><b>Dosen Pembimbing 2:</b><br><br>Miftahul Jannah, S.Si., M.Si.<br>NIP. H.7.199804242023072001</p>', unsafe_allow_html=True)
