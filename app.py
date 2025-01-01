@@ -39,7 +39,7 @@ with col3:
 st.markdown('<h1 class="center">Prediksi Harga Saham PT Kalbe Farma Tbk (KLBF) Menggunakan Metode XGBoost dan LSTM</h1>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below">Oleh:</p>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below"><b>Chandra Putra Ciptaningtyas</b></p>', unsafe_allow_html=True)
-st.markdown('<p class="center">NIM: 123456789</p>', unsafe_allow_html=True)
+st.markdown('<p class="center">NIM. 24050121140106</p>', unsafe_allow_html=True)
 
 # Display dosen pembimbing information
 col_left, col_right = st.columns([1, 1])
