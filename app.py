@@ -48,5 +48,4 @@ with col_left:
     st.markdown('<p class="left"><b>Dosen Pembimbing 1:</b><br>Dr. Triastuti Wuryandari, S.Si., M.Si.<br><i>NIP. 197109061998032001</i></p>', unsafe_allow_html=True)
 
 with col_right:
-    st.markdown('<p class="right"><b>Dosen Pembimbing 2:</b><br>Miftahul Jannah, S.Si., M.Si.<br><i>NIP. H.7.199804242023072001
-</i></p>', unsafe_allow_html=True)
+    st.markdown('<p class="right"><b>Dosen Pembimbing 2:</b><br>Miftahul Jannah, S.Si., M.Si.<br><i>NIP. H.7.199804242023072001</i></p>', unsafe_allow_html=True)
