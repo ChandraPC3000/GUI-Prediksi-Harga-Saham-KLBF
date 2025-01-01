@@ -10,17 +10,20 @@ st.markdown("""
 .left {
     text-align: left;
     margin-left: 50px;
-    margin-top: 20px;
+    margin-top: 30px; /* Adjusted for extra space */
     line-height: 1.8; /* Adjust spacing for better readability */
 }
 .right {
     text-align: right;
     margin-right: 50px;
-    margin-top: 20px;
+    margin-top: 30px; /* Adjusted for extra space */
     line-height: 1.8; /* Adjust spacing for better readability */
 }
 .space-below {
     margin-bottom: 5px;
+}
+.space-between {
+    margin-top: 20px; /* Space between NIM and dosen pembimbing */
 }
 </style>
 """, unsafe_allow_html=True)
@@ -41,7 +44,10 @@ with col3:
 st.markdown('<h1 class="center">Prediksi Harga Saham PT Kalbe Farma Tbk (KLBF) Menggunakan Metode XGBoost dan LSTM</h1>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below">Oleh:</p>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below"><b>Chandra Putra Ciptaningtyas</b></p>', unsafe_allow_html=True)
-st.markdown('<p class="center">NIM: 123456789</p>', unsafe_allow_html=True)
+st.markdown('<p class="center space-below">NIM. 24050121140106</p>', unsafe_allow_html=True)
+
+# Additional space between NIM and dosen pembimbing
+st.markdown('<div class="space-between"></div>', unsafe_allow_html=True)
 
 # Display dosen pembimbing information
 col_left, col_right = st.columns([1, 1])
