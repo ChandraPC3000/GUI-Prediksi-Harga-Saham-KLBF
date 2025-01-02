@@ -25,6 +25,9 @@ st.markdown("""
 .space-between {
     margin-top: 20px; /* Space between NIM and dosen pembimbing */
 }
+.space-name {
+    margin-top: 10px; /* Tambahkan jarak antara judul dan nama */
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -53,7 +56,7 @@ st.markdown('<div class="space-between"></div>', unsafe_allow_html=True)
 col_left, col_right = st.columns([1, 1])
 
 with col_left:
-    st.markdown('<p class="adjusted-left">Dosen Pembimbing 1<br><b>Dr. Triastuti Wuryandari, S.Si., M.Si.</b><br>NIP. 197109061998032001</p>', unsafe_allow_html=True)
+    st.markdown('<p class="adjusted-left"><b>Dosen Pembimbing 1:</b><div class="space-name"></div>Dr. Triastuti Wuryandari, S.Si., M.Si.<br>NIP. 197109061998032001</p>', unsafe_allow_html=True)
 
 with col_right:
-    st.markdown('<p class="adjusted-right">Dosen Pembimbing 2<br><b>Miftahul Jannah, S.Si., M.Si.</b><br>NIP. H.7.199804242023072001</p>', unsafe_allow_html=True)
+    st.markdown('<p class="adjusted-right"><b>Dosen Pembimbing 2:</b><div class="space-name"></div>Miftahul Jannah, S.Si., M.Si.<br>NIP. H.7.199804242023072001</p>', unsafe_allow_html=True)
