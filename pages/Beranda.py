@@ -1,32 +1,29 @@
 import streamlit as st
 import pandas as pd
 
-# Styling for center alignment and layout adjustments
+# Styling for alignment and layout adjustments
 st.markdown("""
 <style>
 .center {
     text-align: center;
 }
-.left {
-    text-align: left;
-    margin-left: 50px;
-    margin-top: 30px; /* Adjusted for extra space */
-    line-height: 1.8; /* Adjust spacing for better readability */
+.adjusted-left {
+    margin-left: 20%; /* Geser sedikit ke tengah kiri */
+    margin-top: 20px;
+    line-height: 1.8;
+    text-align: center;
 }
-.right {
-    text-align: right;
-    margin-right: 50px;
-    margin-top: 30px; /* Adjusted for extra space */
-    line-height: 1.8; /* Adjust spacing for better readability */
+.adjusted-right {
+    margin-right: 20%; /* Geser sedikit ke tengah kanan */
+    margin-top: 20px;
+    line-height: 1.8;
+    text-align: center;
 }
 .space-below {
     margin-bottom: 5px;
 }
 .space-between {
     margin-top: 20px; /* Space between NIM and dosen pembimbing */
-}
-.text-center {
-    text-align: center;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -56,9 +53,7 @@ st.markdown('<div class="space-between"></div>', unsafe_allow_html=True)
 col_left, col_right = st.columns([1, 1])
 
 with col_left:
-    st.markdown('<p class="left text-center"><b>Dosen Pembimbing 1:</b></p>', unsafe_allow_html=True)
-    st.markdown('<p class="left">Dr. Triastuti Wuryandari, S.Si., M.Si.<br>NIP. 197109061998032001</p>', unsafe_allow_html=True)
+    st.markdown('<p class="adjusted-left"><b>Dosen Pembimbing 1:</b><br>Dr. Triastuti Wuryandari, S.Si., M.Si.<br>NIP. 197109061998032001</p>', unsafe_allow_html=True)
 
 with col_right:
-    st.markdown('<p class="right text-center"><b>Dosen Pembimbing 2:</b></p>', unsafe_allow_html=True)
-    st.markdown('<p class="right">Miftahul Jannah, S.Si., M.Si.<br>NIP. H.7.199804242023072001</p>', unsafe_allow_html=True)
+    st.markdown('<p class="adjusted-right"><b>Dosen Pembimbing 2:</b><br>Miftahul Jannah, S.Si., M.Si.<br>NIP. H.7.199804242023072001</p>', unsafe_allow_html=True)
