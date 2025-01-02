@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from predict import load_model, predict
+from datetime import datetime, timedelta
 
 # Load daftar model
 MODELS = ["Model XGBoost Default", "Model XGBoost GridSearch", "Model XGBoost PSO",
@@ -35,9 +36,10 @@ if input_method == "Manual":
         high_prices = np.array([float(x) for x in high_prices.split(",")])
         low_prices = np.array([float(x) for x in low_prices.split(",")])
         close_prices = np.array([float(x) for x in close_prices.split(",")])
+        last_date = datetime.today()
     except ValueError:
         st.error("Pastikan semua nilai input valid dan dipisahkan dengan koma.")
-        open_prices, high_prices, low_prices, close_prices = [], [], [], []
+        open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
 
 elif input_method == "Upload CSV":
     # Input melalui file CSV
@@ -52,11 +54,12 @@ elif input_method == "Upload CSV":
             high_prices = df["High"].values
             low_prices = df["Low"].values
             close_prices = df["Close"].values
+            last_date = pd.to_datetime(df["Date"].iloc[-1])
         except KeyError:
-            st.error("Pastikan file CSV memiliki kolom: Open, High, Low, dan Close.")
-            open_prices, high_prices, low_prices, close_prices = [], [], [], []
+            st.error("Pastikan file CSV memiliki kolom: Date, Open, High, Low, dan Close.")
+            open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
     else:
-        open_prices, high_prices, low_prices, close_prices = [], [], [], []
+        open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
 
 # Prediksi harga penutupan
 if st.sidebar.button("Generate Predictions"):
@@ -68,16 +71,16 @@ if st.sidebar.button("Generate Predictions"):
 
         # Membuat DataFrame untuk visualisasi
         data = pd.DataFrame({
-            "Index": range(1, len(predictions) + 1),
+            "Date": [last_date - timedelta(days=i) for i in range(len(close_prices))][::-1],
             "Harga Aktual": close_prices,
             "Harga Prediksi": predictions
         })
 
         # Visualisasi menggunakan matplotlib
         fig, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(data["Index"], data["Harga Aktual"], label="Harga Aktual", marker='o', color="blue")
-        ax.plot(data["Index"], data["Harga Prediksi"], label="Harga Prediksi", marker='x', color="orange")
-        ax.set_xlabel("Index")
+        ax.plot(data["Date"], data["Harga Aktual"], label="Harga Aktual", marker='o', color="blue")
+        ax.plot(data["Date"], data["Harga Prediksi"], label="Harga Prediksi", marker='x', color="orange")
+        ax.set_xlabel("Tanggal")
         ax.set_ylabel("Harga")
         ax.set_title(f"Visualisasi Prediksi - {selected_model_name}")
         ax.legend()
@@ -91,21 +94,25 @@ if st.sidebar.button("Generate Predictions"):
 
         # Prediksi 10 tahun ke depan
         future_predictions = []
+        future_dates = []
         last_data = [open_prices[-1], high_prices[-1], low_prices[-1], close_prices[-1]]
+        future_date = last_date
+
         for _ in range(252 * 10):  # 252 hari kerja per tahun x 10 tahun
             prediction = predict(model, *last_data, selected_model_name)
             future_predictions.append(prediction)
+            future_dates.append(future_date + timedelta(days=1))
             last_data = [last_data[1], last_data[2], last_data[3], prediction]
+            future_date += timedelta(days=1)
 
         # Tampilkan prediksi masa depan
-        future_indices = range(len(data) + 1, len(data) + 1 + len(future_predictions))
         future_df = pd.DataFrame({
-            "Index": future_indices,
+            "Date": future_dates,
             "Harga Prediksi (Masa Depan)": future_predictions
         })
 
         # Tambahkan ke grafik
-        ax.plot(future_df["Index"], future_df["Harga Prediksi (Masa Depan)"], label="Prediksi Masa Depan", linestyle="--", color="green")
+        ax.plot(future_df["Date"], future_df["Harga Prediksi (Masa Depan)"], label="Prediksi Masa Depan", linestyle="--", color="green")
         ax.legend()
         st.pyplot(fig)
         st.write("Prediksi Masa Depan:")
