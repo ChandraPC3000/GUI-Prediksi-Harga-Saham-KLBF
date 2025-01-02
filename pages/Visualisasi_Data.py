@@ -92,30 +92,30 @@ if st.sidebar.button("Generate Predictions"):
         st.write("Data Prediksi:")
         st.dataframe(data)
 
-        # Prediksi 10 tahun ke depan
+        # Prediksi hingga 2030
         future_predictions = []
         future_dates = []
         last_data = [open_prices[-1], high_prices[-1], low_prices[-1], close_prices[-1]]
         future_date = last_date
 
-        for _ in range(252 * 10):  # 252 hari kerja per tahun x 10 tahun
+        while future_date.year <= 2030:
             prediction = predict(model, *last_data, selected_model_name)
             future_predictions.append(prediction)
             future_dates.append(future_date + timedelta(days=1))
             last_data = [last_data[1], last_data[2], last_data[3], prediction]
             future_date += timedelta(days=1)
 
-        # Tampilkan prediksi masa depan
+        # Tampilkan prediksi masa depan hingga 2030
         future_df = pd.DataFrame({
             "Date": future_dates,
-            "Harga Prediksi (Masa Depan)": future_predictions
+            "Harga Prediksi (Hingga 2030)": future_predictions
         })
 
         # Tambahkan ke grafik
-        ax.plot(future_df["Date"], future_df["Harga Prediksi (Masa Depan)"], label="Prediksi Masa Depan", linestyle="--", color="green")
+        ax.plot(future_df["Date"], future_df["Harga Prediksi (Hingga 2030)"], label="Prediksi Hingga 2030", linestyle="--", color="green")
         ax.legend()
         st.pyplot(fig)
-        st.write("Prediksi Masa Depan:")
+        st.write("Prediksi Hingga 2030:")
         st.dataframe(future_df)
     else:
         st.error("Jumlah nilai pada input harga tidak sama atau data kosong.")
