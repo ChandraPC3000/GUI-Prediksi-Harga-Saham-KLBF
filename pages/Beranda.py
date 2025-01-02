@@ -27,7 +27,7 @@ st.markdown("""
 }
 .space-name {
     margin-top: 10px; /* Tambahkan jarak antara judul dan nama */
-    text-align: center; /* Center alignment for names and NIP */
+    line-height: 1.8;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -59,8 +59,7 @@ col_left, col_right = st.columns([1, 1])
 with col_left:
     st.markdown('''
     <p class="adjusted-left">
-        <b>Dosen Pembimbing 1:</b>
-        <div class="space-name"></div>
+        <b>Dosen Pembimbing 1:</b><br><br>
         <span>Dr. Triastuti Wuryandari, S.Si., M.Si.</span><br>
         <span>NIP. 197109061998032001</span>
     </p>
@@ -69,8 +68,7 @@ with col_left:
 with col_right:
     st.markdown('''
     <p class="adjusted-right">
-        <b>Dosen Pembimbing 2:</b>
-        <div class="space-name"></div>
+        <b>Dosen Pembimbing 2:</b><br><br>
         <span>Miftahul Jannah, S.Si., M.Si.</span><br>
         <span>NIP. H.7.199804242023072001</span>
     </p>
