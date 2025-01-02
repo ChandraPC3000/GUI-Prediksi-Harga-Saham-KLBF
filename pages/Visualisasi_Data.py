@@ -18,25 +18,49 @@ selected_model_name = st.selectbox("Pilih Model Prediksi", MODELS)
 # Load model berdasarkan pilihan
 model = load_model(selected_model_name)
 
-# Input data untuk prediksi
+# Bagian input
 st.sidebar.header("Input Data Prediksi")
-open_prices = st.sidebar.text_area("Harga Open (Pisahkan dengan koma)", "1530, 1540, 1550")
-high_prices = st.sidebar.text_area("Harga High (Pisahkan dengan koma)", "1550, 1560, 1570")
-low_prices = st.sidebar.text_area("Harga Low (Pisahkan dengan koma)", "1500, 1510, 1520")
-close_prices = st.sidebar.text_area("Harga Close (Pisahkan dengan koma)", "1510, 1520, 1530")
+input_method = st.sidebar.radio("Pilih Metode Input", ["Manual", "Upload CSV"])
 
-# Konversi input ke array numpy
-try:
-    open_prices = np.array([float(x) for x in open_prices.split(",")])
-    high_prices = np.array([float(x) for x in high_prices.split(",")])
-    low_prices = np.array([float(x) for x in low_prices.split(",")])
-    close_prices = np.array([float(x) for x in close_prices.split(",")])
-except ValueError:
-    st.error("Pastikan semua nilai input valid dan dipisahkan dengan koma.")
+if input_method == "Manual":
+    # Input manual
+    open_prices = st.sidebar.text_area("Harga Open (Pisahkan dengan koma)", "1530, 1540, 1550")
+    high_prices = st.sidebar.text_area("Harga High (Pisahkan dengan koma)", "1550, 1560, 1570")
+    low_prices = st.sidebar.text_area("Harga Low (Pisahkan dengan koma)", "1500, 1510, 1520")
+    close_prices = st.sidebar.text_area("Harga Close (Pisahkan dengan koma)", "1510, 1520, 1530")
+
+    try:
+        # Konversi input ke array numpy
+        open_prices = np.array([float(x) for x in open_prices.split(",")])
+        high_prices = np.array([float(x) for x in high_prices.split(",")])
+        low_prices = np.array([float(x) for x in low_prices.split(",")])
+        close_prices = np.array([float(x) for x in close_prices.split(",")])
+    except ValueError:
+        st.error("Pastikan semua nilai input valid dan dipisahkan dengan koma.")
+        open_prices, high_prices, low_prices, close_prices = [], [], [], []
+
+elif input_method == "Upload CSV":
+    # Input melalui file CSV
+    uploaded_file = st.sidebar.file_uploader("Upload File CSV", type=["csv"])
+    if uploaded_file is not None:
+        try:
+            df = pd.read_csv(uploaded_file)
+            st.write("Data dari File CSV:")
+            st.write(df.head())
+
+            open_prices = df["Open"].values
+            high_prices = df["High"].values
+            low_prices = df["Low"].values
+            close_prices = df["Close"].values
+        except KeyError:
+            st.error("Pastikan file CSV memiliki kolom: Open, High, Low, dan Close.")
+            open_prices, high_prices, low_prices, close_prices = [], [], [], []
+    else:
+        open_prices, high_prices, low_prices, close_prices = [], [], [], []
 
 # Prediksi harga penutupan
 if st.sidebar.button("Generate Predictions"):
-    if len(open_prices) == len(high_prices) == len(low_prices) == len(close_prices):
+    if len(open_prices) == len(high_prices) == len(low_prices) == len(close_prices) and len(open_prices) > 0:
         predictions = []
         for open_price, high_price, low_price, close_price in zip(open_prices, high_prices, low_prices, close_prices):
             prediction = predict(model, open_price, high_price, low_price, close_price, selected_model_name)
@@ -50,9 +74,9 @@ if st.sidebar.button("Generate Predictions"):
         })
 
         # Visualisasi menggunakan matplotlib
-        fig, ax = plt.subplots()
-        ax.plot(data["Index"], data["Harga Aktual"], label="Harga Aktual", marker='o')
-        ax.plot(data["Index"], data["Harga Prediksi"], label="Harga Prediksi", marker='x')
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.plot(data["Index"], data["Harga Aktual"], label="Harga Aktual", marker='o', color="blue")
+        ax.plot(data["Index"], data["Harga Prediksi"], label="Harga Prediksi", marker='x', color="orange")
         ax.set_xlabel("Index")
         ax.set_ylabel("Harga")
         ax.set_title(f"Visualisasi Prediksi - {selected_model_name}")
@@ -64,5 +88,27 @@ if st.sidebar.button("Generate Predictions"):
         # Tampilkan data
         st.write("Data Prediksi:")
         st.dataframe(data)
+
+        # Prediksi 10 tahun ke depan
+        future_predictions = []
+        last_data = [open_prices[-1], high_prices[-1], low_prices[-1], close_prices[-1]]
+        for _ in range(252 * 10):  # 252 hari kerja per tahun x 10 tahun
+            prediction = predict(model, *last_data, selected_model_name)
+            future_predictions.append(prediction)
+            last_data = [last_data[1], last_data[2], last_data[3], prediction]
+
+        # Tampilkan prediksi masa depan
+        future_indices = range(len(data) + 1, len(data) + 1 + len(future_predictions))
+        future_df = pd.DataFrame({
+            "Index": future_indices,
+            "Harga Prediksi (Masa Depan)": future_predictions
+        })
+
+        # Tambahkan ke grafik
+        ax.plot(future_df["Index"], future_df["Harga Prediksi (Masa Depan)"], label="Prediksi Masa Depan", linestyle="--", color="green")
+        ax.legend()
+        st.pyplot(fig)
+        st.write("Prediksi Masa Depan:")
+        st.dataframe(future_df)
     else:
-        st.error("Jumlah nilai pada input harga tidak sama.")
+        st.error("Jumlah nilai pada input harga tidak sama atau data kosong.")
