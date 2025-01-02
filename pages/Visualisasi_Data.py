@@ -4,80 +4,65 @@ import numpy as np
 import matplotlib.pyplot as plt
 from predict import load_model, predict
 
-# Styling halaman
-st.markdown("""
-<style>
-.center {
-    text-align: center;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Judul halaman
-st.markdown('<h1 class="center">Visualisasi Grafik Prediksi Harga Saham PT Kalbe Farma Tbk (KLBF)</h1>', unsafe_allow_html=True)
-st.write("Halaman ini menampilkan grafik prediksi harga saham berdasarkan data input.")
-
-# Pilihan model
+# Load daftar model
 MODELS = ["Model XGBoost Default", "Model XGBoost GridSearch", "Model XGBoost PSO",
           "Model LSTM Adam", "Model LSTM RMSprop"]
+
+# Halaman Visualisasi Grafik Prediksi
+st.title("Visualisasi Grafik Prediksi Saham Kalbe Farma (KLBF)")
+st.write("Halaman ini menampilkan visualisasi grafik prediksi harga saham berdasarkan model yang dipilih.")
 
 # Dropdown untuk memilih model
 selected_model_name = st.selectbox("Pilih Model Prediksi", MODELS)
 
-# Load model sesuai pilihan
+# Load model berdasarkan pilihan
+model = load_model(selected_model_name)
+
+# Input data untuk prediksi
+st.sidebar.header("Input Data Prediksi")
+open_prices = st.sidebar.text_area("Harga Open (Pisahkan dengan koma)", "1530, 1540, 1550")
+high_prices = st.sidebar.text_area("Harga High (Pisahkan dengan koma)", "1550, 1560, 1570")
+low_prices = st.sidebar.text_area("Harga Low (Pisahkan dengan koma)", "1500, 1510, 1520")
+close_prices = st.sidebar.text_area("Harga Close (Pisahkan dengan koma)", "1510, 1520, 1530")
+
+# Konversi input ke array numpy
 try:
-    model = load_model(selected_model_name)
-except Exception as e:
-    st.error(f"Gagal memuat model: {e}")
-    st.stop()
+    open_prices = np.array([float(x) for x in open_prices.split(",")])
+    high_prices = np.array([float(x) for x in high_prices.split(",")])
+    low_prices = np.array([float(x) for x in low_prices.split(",")])
+    close_prices = np.array([float(x) for x in close_prices.split(",")])
+except ValueError:
+    st.error("Pastikan semua nilai input valid dan dipisahkan dengan koma.")
 
-# Upload file data atau masukkan data manual
-uploaded_file = st.file_uploader(
-    "Upload File CSV dengan kolom [Date, Open, High, Low, Close, Volume]", type=["csv"])
-
-if uploaded_file:
-    try:
-        # Membaca file CSV
-        df = pd.read_csv(uploaded_file, parse_dates=["Date"])
-        st.write("Data yang diunggah:")
-        st.dataframe(df.head())
-
-        # Validasi data
-        required_columns = ["Date", "Open", "High", "Low", "Close"]
-        if not all(col in df.columns for col in required_columns):
-            st.error(f"File harus memiliki kolom: {', '.join(required_columns)}")
-            st.stop()
-
-        # Prediksi untuk setiap baris
+# Prediksi harga penutupan
+if st.sidebar.button("Generate Predictions"):
+    if len(open_prices) == len(high_prices) == len(low_prices) == len(close_prices):
         predictions = []
-        for index, row in df.iterrows():
-            try:
-                pred_close = predict(
-                    model,
-                    row["Open"],
-                    row["High"],
-                    row["Low"],
-                    row["Close"],
-                    selected_model_name
-                )
-                predictions.append(pred_close)
-            except Exception as e:
-                st.error(f"Error saat memproses baris ke-{index + 1}: {e}")
-                predictions.append(None)
+        for open_price, high_price, low_price, close_price in zip(open_prices, high_prices, low_prices, close_prices):
+            prediction = predict(model, open_price, high_price, low_price, close_price, selected_model_name)
+            predictions.append(prediction)
 
-        # Menambahkan kolom prediksi ke data
-        df["Predicted_Close"] = predictions
+        # Membuat DataFrame untuk visualisasi
+        data = pd.DataFrame({
+            "Index": range(1, len(predictions) + 1),
+            "Harga Aktual": close_prices,
+            "Harga Prediksi": predictions
+        })
 
-        # Visualisasi data aktual dan prediksi
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(df["Date"], df["Close"], label="Actual Close Price", color="blue", linewidth=2)
-        ax.plot(df["Date"], df["Predicted_Close"], label="Predicted Close Price", color="orange", linewidth=2)
-        ax.set_title("Grafik Prediksi Harga Saham", fontsize=16)
-        ax.set_xlabel("Tanggal", fontsize=12)
-        ax.set_ylabel("Harga Saham", fontsize=12)
+        # Visualisasi menggunakan matplotlib
+        fig, ax = plt.subplots()
+        ax.plot(data["Index"], data["Harga Aktual"], label="Harga Aktual", marker='o')
+        ax.plot(data["Index"], data["Harga Prediksi"], label="Harga Prediksi", marker='x')
+        ax.set_xlabel("Index")
+        ax.set_ylabel("Harga")
+        ax.set_title(f"Visualisasi Prediksi - {selected_model_name}")
         ax.legend()
+
+        # Tampilkan grafik
         st.pyplot(fig)
-    except Exception as e:
-        st.error(f"Terjadi kesalahan saat memproses file: {e}")
-else:
-    st.info("Unggah file data untuk melihat visualisasi grafik prediksi.")
+
+        # Tampilkan data
+        st.write("Data Prediksi:")
+        st.dataframe(data)
+    else:
+        st.error("Jumlah nilai pada input harga tidak sama.")
