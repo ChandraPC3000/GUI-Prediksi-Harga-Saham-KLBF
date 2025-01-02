@@ -41,7 +41,7 @@ with col3:
     st.write(' ')
 
 # Title and information
-st.markdown('<h1 class="center">Prediksi Harga Saham PT Kalbe Farma Tbk (KLBF) Menggunakan Metode XGBoost dan LSTM</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="center">Prediksi Harga Saham PT Kalbe Farma Tbk (KLBF) menggunakan Model XGBoost dan LSTM</h1>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below">Oleh:</p>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below"><b>Chandra Putra Ciptaningtyas</b></p>', unsafe_allow_html=True)
 st.markdown('<p class="center space-below">NIM. 24050121140106</p>', unsafe_allow_html=True)
