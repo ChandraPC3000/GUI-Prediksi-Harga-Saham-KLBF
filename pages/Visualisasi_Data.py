@@ -1,73 +1,68 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from predict import load_model, predict
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
-# Title for the page
-st.title("Visualisasi Data dan Prediksi Saham Kalbe Farma (KLBF)")
+# Load daftar model
+MODELS = ["Model XGBoost Default", "Model XGBoost GridSearch", "Model XGBoost PSO",
+          "Model LSTM Adam", "Model LSTM RMSprop"]
 
-# File uploader for CSV
-uploaded_file = st.file_uploader(
-    "Upload File CSV dengan header Date, Close, Open, High, Low, Volume", type=["csv"])
+# Halaman Visualisasi Grafik Prediksi
+st.title("Visualisasi Grafik Prediksi Saham Kalbe Farma (KLBF)")
+st.write("Halaman ini menampilkan visualisasi grafik prediksi harga saham berdasarkan model yang dipilih.")
 
-if uploaded_file is not None:
-    # Load the CSV file
-    df = pd.read_csv(uploaded_file, parse_dates=["Date"])
+# Dropdown untuk memilih model
+selected_model_name = st.selectbox("Pilih Model Prediksi", MODELS)
 
-    # Show the uploaded data
-    st.write("### Data dari File CSV")
-    st.write(df)
+# Load model berdasarkan pilihan
+model = load_model(selected_model_name)
 
-    # Plot the actual data
-    st.write("### Visualisasi Data Aktual")
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(df["Date"], df["Close"], label="Harga Close (Aktual)", color="blue")
+# Input data untuk prediksi
+st.sidebar.header("Input Data Prediksi")
+open_prices = st.sidebar.text_area("Harga Open (Pisahkan dengan koma)", "1530, 1540, 1550")
+high_prices = st.sidebar.text_area("Harga High (Pisahkan dengan koma)", "1550, 1560, 1570")
+low_prices = st.sidebar.text_area("Harga Low (Pisahkan dengan koma)", "1500, 1510, 1520")
+close_prices = st.sidebar.text_area("Harga Close (Pisahkan dengan koma)", "1510, 1520, 1530")
 
-    # Predict future values
-    model_name = "Model XGBoost PSO"  # Default model
-    model = load_model(model_name)
+# Konversi input ke array numpy
+try:
+    open_prices = np.array([float(x) for x in open_prices.split(",")])
+    high_prices = np.array([float(x) for x in high_prices.split(",")])
+    low_prices = np.array([float(x) for x in low_prices.split(",")])
+    close_prices = np.array([float(x) for x in close_prices.split(",")])
+except ValueError:
+    st.error("Pastikan semua nilai input valid dan dipisahkan dengan koma.")
 
-    scaler = MinMaxScaler()
-    data_scaled = scaler.fit_transform(df[["Open", "High", "Low", "Close"]])
+# Prediksi harga penutupan
+if st.sidebar.button("Generate Predictions"):
+    if len(open_prices) == len(high_prices) == len(low_prices) == len(close_prices):
+        predictions = []
+        for open_price, high_price, low_price, close_price in zip(open_prices, high_prices, low_prices, close_prices):
+            prediction = predict(model, open_price, high_price, low_price, close_price, selected_model_name)
+            predictions.append(prediction)
 
-    # Generate predictions for 5-10 years ahead
-    future_dates = pd.date_range(
-        start=df["Date"].iloc[-1], periods=252 * 10, freq="B")  # Business days for 10 years
-    predictions = []
-    last_data = data_scaled[-1, :]  # Last row of scaled data
+        # Membuat DataFrame untuk visualisasi
+        data = pd.DataFrame({
+            "Index": range(1, len(predictions) + 1),
+            "Harga Aktual": close_prices,
+            "Harga Prediksi": predictions
+        })
 
-    for _ in range(len(future_dates)):
-        prediction = model.predict(last_data.reshape(1, -1))[0]
-        predictions.append(prediction)
-        # Update last_data with the predicted value for chaining predictions
-        last_data = np.roll(last_data, -1)
-        last_data[-1] = prediction
+        # Visualisasi menggunakan matplotlib
+        fig, ax = plt.subplots()
+        ax.plot(data["Index"], data["Harga Aktual"], label="Harga Aktual", marker='o')
+        ax.plot(data["Index"], data["Harga Prediksi"], label="Harga Prediksi", marker='x')
+        ax.set_xlabel("Index")
+        ax.set_ylabel("Harga")
+        ax.set_title(f"Visualisasi Prediksi - {selected_model_name}")
+        ax.legend()
 
-    # Rescale predictions back to original scale
-    predictions_rescaled = scaler.inverse_transform(
-        np.column_stack([np.zeros_like(predictions)] * 3 + [predictions]))[:, -1]
+        # Tampilkan grafik
+        st.pyplot(fig)
 
-    # Plot predictions
-    ax.plot(future_dates, predictions_rescaled, label="Harga Close (Prediksi)", color="orange", linestyle="--")
-
-    # Customize plot
-    ax.set_title("Visualisasi Harga Saham dan Prediksi", fontsize=16)
-    ax.set_xlabel("Tanggal", fontsize=12)
-    ax.set_ylabel("Harga Close", fontsize=12)
-    ax.legend()
-    st.pyplot(fig)
-
-    # Option to display more data
-    st.write("### Statistik Data")
-    st.write(df.describe())
-else:
-    st.info("Silakan upload file CSV untuk melihat visualisasi dan prediksi.")
-
-# Footer or any additional information
-st.markdown("""
----
-**Note:** Pastikan file CSV memiliki header kolom yang sesuai dengan format: **Date, Close, Open, High, Low, Volume**.
-Prediksi menggunakan model XGBoost PSO dan hanya bersifat simulasi.
-""")
+        # Tampilkan data
+        st.write("Data Prediksi:")
+        st.dataframe(data)
+    else:
+        st.error("Jumlah nilai pada input harga tidak sama.")
