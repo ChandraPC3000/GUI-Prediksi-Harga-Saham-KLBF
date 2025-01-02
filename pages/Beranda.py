@@ -59,8 +59,8 @@ col_left, col_right = st.columns([1, 1])
 with col_left:
     st.markdown('''
     <p class="adjusted-left">
-        <b>Dosen Pembimbing 1:</b><br><br>
-        <span>Dr. Triastuti Wuryandari, S.Si., M.Si.</span><br>
+        Dosen Pembimbing 1<br><br>
+        <span><b>Dr. Triastuti Wuryandari, S.Si., M.Si.</b></span><br>
         <span>NIP. 197109061998032001</span>
     </p>
     ''', unsafe_allow_html=True)
@@ -68,8 +68,8 @@ with col_left:
 with col_right:
     st.markdown('''
     <p class="adjusted-right">
-        <b>Dosen Pembimbing 2:</b><br><br>
-        <span>Miftahul Jannah, S.Si., M.Si.</span><br>
+        Dosen Pembimbing 2<br><br>
+        <span><b>Miftahul Jannah, S.Si., M.Si.</b></span><br>
         <span>NIP. H.7.199804242023072001</span>
     </p>
     ''', unsafe_allow_html=True)
