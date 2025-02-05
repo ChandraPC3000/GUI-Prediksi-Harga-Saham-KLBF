@@ -23,17 +23,27 @@ MODELS_PATH = {
 
 def load_model(model_name):
     """Membaca parameter XGBoost dari CSV dan membuat model."""
-    model_path = MODELS_PATH[model_name]
-    
-    if model_path.endswith(".csv"):
+    model_path = MODELS_PATH.get(model_name)
+
+    if model_path is None:
+        raise ValueError(f"Model '{model_name}' tidak ditemukan dalam MODELS_PATH.")
+
+    try:
+        # Baca file CSV
         model_params = pd.read_csv(model_path)
+
+        # Pastikan nama kolom benar
+        if "Parameter" not in model_params.columns or "Value" not in model_params.columns:
+            raise ValueError(f"File {model_path} tidak memiliki kolom 'Parameter' dan 'Value'.")
+
+        # Konversi CSV ke dictionary
         params_dict = model_params.set_index("Parameter")["Value"].to_dict()
 
-        # Konversi nilai yang diperlukan menjadi integer atau float
+        # Pastikan tipe data sesuai
         params_dict["max_depth"] = int(float(params_dict.get("max_depth", 6)))
         params_dict["n_estimators"] = int(float(params_dict.get("n_estimators", 100)))
         params_dict["min_child_weight"] = float(params_dict.get("min_child_weight", 1))
-        params_dict["gamma"] = float(params_dict.get("gamma", 0.1))
+        params_dict["gamma"] = float(params_dict.get("gamma", 0))
         params_dict["reg_lambda"] = float(params_dict.get("reg_lambda", 1))
         params_dict["learning_rate"] = float(params_dict.get("learning_rate", 0.3))
         params_dict["subsample"] = float(params_dict.get("subsample", 1))
@@ -41,10 +51,11 @@ def load_model(model_name):
 
         # Buat model dengan parameter yang telah diperbaiki
         model = XGBRegressor(**params_dict)
-        
+
         return model
-    else:
-        raise ValueError("Model tidak ditemukan atau format tidak didukung.")
+
+    except Exception as e:
+        raise ValueError(f"Terjadi kesalahan saat membaca model dari {model_path}: {str(e)}")
 
 def predict(model, open_price, high_price, low_price, close_price):
     """Melakukan prediksi harga saham menggunakan model XGBoost."""
