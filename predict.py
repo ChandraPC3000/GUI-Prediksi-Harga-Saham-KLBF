@@ -26,18 +26,15 @@ def load_model(model_name):
     model_path = MODELS_PATH[model_name]
     
     if model_path.endswith(".csv"):
-        # Baca parameter dari CSV
         model_params = pd.read_csv(model_path)
-        
-        # Konversi DataFrame ke Dictionary parameter
         params_dict = model_params.set_index("Parameter")["Value"].to_dict()
-
-        # Pastikan tipe parameter sesuai dengan XGBoost
-        params_dict["max_depth"] = int(params_dict["max_depth"])
-        params_dict["n_estimators"] = int(params_dict.get("n_estimators", 100))  # Jika tidak ada, pakai default 100
-        params_dict["min_child_weight"] = int(params_dict["min_child_weight"])
         
-        # Buat model XGBoost dengan parameter dari CSV
+        # Konversi nilai yang diperlukan menjadi integer, dan tambahkan nilai default jika tidak ada
+        params_dict["max_depth"] = int(params_dict.get("max_depth", 6))
+        params_dict["n_estimators"] = int(params_dict.get("n_estimators", 100))
+        params_dict["min_child_weight"] = int(params_dict.get("min_child_weight", 1))  # Tambahkan default
+
+        # Buat model dengan parameter yang telah diperbaiki
         model = XGBRegressor(**params_dict)
         
         return model
