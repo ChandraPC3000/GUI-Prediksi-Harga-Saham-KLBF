@@ -1,0 +1,8 @@
+Parameter,Nilai Parameter
+max_depth,3.0
+gamma,1.6422783103045984
+reg_lambda,0.8768749203502458
+learning_rate,0.1996776432537486
+min_child_weight,1.7483348075973415
+subsample,0.5040839137292681
+colsample_bytree,0.9737270064242465
