@@ -1,13 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import tensorflow as tf
-from sklearn.preprocessing import MinMaxScaler
 from predict import load_model, predict
 
 # Load daftar model
-MODELS = ["Model XGBoost Default", "Model XGBoost GridSearch", "Model XGBoost PSO",
-          "Model LSTM Adam", "Model LSTM RMSprop"]
+MODELS = ["Model XGBoost Default", "Model XGBoost GridSearchCV", "Model XGBoost PSO"]
 
 # Halaman Prediksi
 st.title("Prediksi Saham Kalbe Farma (KLBF)")
@@ -17,45 +14,29 @@ st.write("Memprediksi **harga penutupan** dari saham berdasarkan harga **open**,
 selected_model_name = st.selectbox("Pilih Model Prediksi", MODELS)
 
 # Informasi performa model berdasarkan pilihan
-if selected_model_name == "Model LSTM Adam":
+if selected_model_name == "Model XGBoost GridSearchCV":
     st.text('''
-    Mean Squared Error (MSE): 10812.72
-    Root Mean Squared Error (RMSE): 103.98
-    Mean Absolute Error (MAE): 85.10
-    Mean Absolute Percentage Error (MAPE): 5.42
-    R-squared: 0.09
-''')
-elif selected_model_name == "Model LSTM RMSprop":
-    st.text('''
-    Mean Squared Error (MSE): 15181.06
-    Root Mean Squared Error (RMSE): 123.21
-    Mean Absolute Error (MAE): 100.09
-    Mean Absolute Percentage Error (MAPE): 6.29
-    R-squared: -0.27
-''')
-elif selected_model_name == "Model XGBoost GridSearch":
-    st.text('''
-    Mean Squared Error (MSE): 919.37
-    Root Mean Squared Error (RMSE): 30.32
-    Mean Absolute Error (MAE): 22.57
-    Mean Absolute Percentage Error (MAPE): 1.50
-    R-squared: 0.98
+    Mean Squared Error (MSE): 1082.06
+    Root Mean Squared Error (RMSE): 32.89
+    Mean Absolute Error (MAE): 24.96
+    Mean Absolute Percentage Error (MAPE): 1.59
+    R-squared: 0.91
 ''')
 elif selected_model_name == "Model XGBoost PSO":
     st.text('''
-    Mean Squared Error (MSE): 925.01
-    Root Mean Squared Error (RMSE): 30.41
-    Mean Absolute Error (MAE): 22.46
-    Mean Absolute Percentage Error (MAPE): 1.49
-    R-squared: 0.98
+    Mean Squared Error (MSE): 933.66
+    Root Mean Squared Error (RMSE): 30.56
+    Mean Absolute Error (MAE): 22.98
+    Mean Absolute Percentage Error (MAPE): 1.47
+    R-squared: 0.92
 ''')
 elif selected_model_name == "Model XGBoost Default":
     st.text('''
-    Mean Squared Error (MSE): 1406.37
-    Root Mean Squared Error (RMSE): 37.50
-    Mean Absolute Error (MAE): 27.52
-    Mean Absolute Percentage Error (MAPE): 1.84
-    R-squared: 0.98
+    Mean Squared Error (MSE): 1216.80
+    Root Mean Squared Error (RMSE): 34.88
+    Mean Absolute Error (MAE): 27.48
+    Mean Absolute Percentage Error (MAPE): 1.76
+    R-squared: 0.90
 ''')
 
 # Load model berdasarkan pilihan
@@ -77,7 +58,7 @@ if input_method == "Manual":
         if high_price >= low_price:
             # Prediksi
             predicted_close = predict(
-                model, open_price, high_price, low_price, close_price, selected_model_name)
+                model, open_price, high_price, low_price, close_price)
             st.success(f"Prediksi Harga Penutupan: ${predicted_close:.2f}")
         else:
             st.error("High price harus lebih besar atau sama dengan low price.")
@@ -104,7 +85,7 @@ elif input_method == "Upload CSV":
                 if high_price >= low_price:
                     # Prediksi
                     predicted_close = predict(
-                        model, open_price, high_price, low_price, close_price, selected_model_name)
+                        model, open_price, high_price, low_price, close_price)
                     st.success(f"Prediksi Harga Penutupan: ${predicted_close:.2f}")
                 else:
                     st.error("High price harus lebih besar atau sama dengan low price.")
