@@ -1,113 +1,108 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
-from xgboost import XGBRegressor
+import numpy as np
+import matplotlib.pyplot as plt
+from predict import load_model, predict
+from datetime import datetime, timedelta
 
-# Konstanta nilai minimum dan maksimum berdasarkan penjelasan
-MIN_VALUE = 784.91
-MAX_VALUE = 2271.54
+# Load daftar model
+MODELS = ["Model XGBoost Default", "Model XGBoost GridSearchCV", "Model XGBoost PSO"]
 
-# Fungsi Normalisasi
-def custom_min_max_scaler(value, min_value=MIN_VALUE, max_value=MAX_VALUE):
-    return 1 - ((value - min_value) / (max_value - min_value))
+# Halaman Visualisasi Grafik Prediksi
+st.title("Visualisasi Grafik Prediksi Saham Kalbe Farma (KLBF)")
+st.write("Halaman ini menampilkan visualisasi grafik prediksi harga saham berdasarkan model yang dipilih.")
 
-# Fungsi Denormalisasi
-def denormalize(value, min_value=MIN_VALUE, max_value=MAX_VALUE):
-    return max_value - (value * (max_value - min_value))
+# Dropdown untuk memilih model
+selected_model_name = st.selectbox("Pilih Model Prediksi", MODELS)
 
-# Path CSV untuk model XGBoost yang berisi parameter
-MODELS_PATH = {
-    "Model XGBoost Default": "models/xgboost_model_default_params.csv",
-    "Model XGBoost GridSearchCV": "models/xgboost_gridsearchcv_params.csv",
-    "Model XGBoost PSO": "models/xgboost_pso_params.csv",
-}
+# Load model berdasarkan pilihan
+model = load_model(selected_model_name)
 
-def load_model(model_name):
-    """Membaca parameter XGBoost dari CSV dan membuat model."""
-    
-    model_path = MODELS_PATH.get(model_name)
+# Bagian input
+st.sidebar.header("Input Data Prediksi")
+input_method = st.sidebar.radio("Pilih Metode Input", ["Manual", "Upload CSV"])
 
-    if model_path is None:
-        raise ValueError(f"⚠️ Model '{model_name}' tidak ditemukan dalam MODELS_PATH.")
-
-    st.write(f"🔍 Membaca model dari: {model_path}")
+if input_method == "Manual":
+    # Input manual
+    open_prices = st.sidebar.text_area("Harga Open (Pisahkan dengan koma)", "1530, 1540, 1550")
+    high_prices = st.sidebar.text_area("Harga High (Pisahkan dengan koma)", "1550, 1560, 1570")
+    low_prices = st.sidebar.text_area("Harga Low (Pisahkan dengan koma)", "1500, 1510, 1520")
+    close_prices = st.sidebar.text_area("Harga Close (Pisahkan dengan koma)", "1510, 1520, 1530")
 
     try:
-        # Baca file CSV
-        model_params = pd.read_csv(model_path)
+        # Konversi input ke array numpy
+        open_prices = np.array([float(x.strip()) for x in open_prices.split(",")])
+        high_prices = np.array([float(x.strip()) for x in high_prices.split(",")])
+        low_prices = np.array([float(x.strip()) for x in low_prices.split(",")])
+        close_prices = np.array([float(x.strip()) for x in close_prices.split(",")])
+        last_date = datetime.today()
+    except ValueError:
+        st.error("Pastikan semua nilai input valid dan dipisahkan dengan koma.")
+        open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
 
-        # Debug: Tampilkan isi CSV
-        st.write(f"📄 Isi CSV {model_name}:")
-        st.write(model_params.head())
+elif input_method == "Upload CSV":
+    # Input melalui file CSV
+    uploaded_file = st.sidebar.file_uploader("Upload File CSV", type=["csv"])
+    if uploaded_file is not None:
+        try:
+            df = pd.read_csv(uploaded_file)
 
-        # Pastikan kolom yang dibutuhkan ada
-        if "Parameter" not in model_params.columns or "Value" not in model_params.columns:
-            raise ValueError(f"⚠️ File {model_path} tidak memiliki kolom 'Parameter' dan 'Value'. Periksa formatnya.")
+            # Cek apakah kolom yang dibutuhkan ada di dalam dataset
+            required_columns = ["Date", "Open", "High", "Low", "Close"]
+            missing_cols = [col for col in required_columns if col not in df.columns]
+            if missing_cols:
+                st.error(f"File CSV harus memiliki kolom: {', '.join(missing_cols)}")
+                open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
+            else:
+                st.write("Data dari File CSV:")
+                st.write(df.head())
 
-        # Konversi CSV ke dictionary
-        params_dict = model_params.set_index("Parameter")["Value"].to_dict()
+                open_prices = df["Open"].values
+                high_prices = df["High"].values
+                low_prices = df["Low"].values
+                close_prices = df["Close"].values
 
-        # Konversi tipe data yang sesuai
-        params_dict["max_depth"] = int(float(params_dict.get("max_depth", 6)))
-        params_dict["n_estimators"] = int(float(params_dict.get("n_estimators", 100)))
-        params_dict["min_child_weight"] = float(params_dict.get("min_child_weight", 1))  # Jangan paksa ke integer
-        params_dict["gamma"] = float(params_dict.get("gamma", 0))
-        params_dict["reg_lambda"] = float(params_dict.get("reg_lambda", 1))
-        params_dict["learning_rate"] = float(params_dict.get("learning_rate", 0.3))
-        params_dict["subsample"] = float(params_dict.get("subsample", 1))
-        params_dict["colsample_bytree"] = float(params_dict.get("colsample_bytree", 1))
-
-        st.write("🔢 Parameter yang digunakan untuk model:", params_dict)
-
-        # Buat model dengan parameter yang telah diperbaiki
-        model = XGBRegressor(**params_dict)
-
-        return model
-
-    except Exception as e:
-        raise ValueError(f"⚠️ Terjadi kesalahan saat membaca model dari {model_path}:\n{str(e)}")
-
-def predict(model, open_price, high_price, low_price, close_price):
-    """Melakukan prediksi harga saham menggunakan model XGBoost."""
-
-    # Normalisasi input data
-    input_data = np.array([
-        [
-            custom_min_max_scaler(open_price),
-            custom_min_max_scaler(high_price),
-            custom_min_max_scaler(low_price),
-            custom_min_max_scaler(close_price)
-        ]
-    ])
-    
-    # Prediksi harga saham (dalam skala normalisasi)
-    prediction = model.predict(input_data)
-    prediction_close = prediction[0]
-
-    # Denormalisasi hasil prediksi
-    prediction_close = denormalize(prediction_close)
-    
-    return prediction_close
-
-# --- Streamlit UI ---
-st.title("Prediksi Harga Saham KLBF dengan XGBoost")
-
-# Pilih model dari CSV
-model_option = st.selectbox("Pilih Model XGBoost:", list(MODELS_PATH.keys()))
-
-if st.button("Muat Model"):
-    model = load_model(model_option)
-    st.success(f"Model {model_option} berhasil dimuat!")
-
-# Input harga saham
-open_price = st.number_input("Harga Open:", min_value=0.0, format="%.2f")
-high_price = st.number_input("Harga High:", min_value=0.0, format="%.2f")
-low_price = st.number_input("Harga Low:", min_value=0.0, format="%.2f")
-close_price = st.number_input("Harga Close:", min_value=0.0, format="%.2f")
-
-if st.button("Prediksi Harga Close"):
-    if 'model' in locals():  # Pastikan model sudah dimuat
-        prediksi_harga = predict(model, open_price, high_price, low_price, close_price)
-        st.success(f"Prediksi Harga Close (Denormalisasi): {prediksi_harga:.2f}")
+                # Konversi tanggal dengan aman
+                try:
+                    last_date = pd.to_datetime(df["Date"].iloc[-1])
+                except Exception:
+                    st.error("Format tanggal pada file CSV tidak dikenali. Pastikan menggunakan format YYYY-MM-DD atau DD/MM/YYYY.")
+                    last_date = datetime.today()
+        except Exception as e:
+            st.error(f"Terjadi kesalahan saat membaca file CSV: {e}")
+            open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
     else:
-        st.error("Harap pilih dan muat model terlebih dahulu.")
+        open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
+
+# Prediksi harga penutupan
+if st.sidebar.button("Generate Predictions"):
+    if len(open_prices) == len(high_prices) == len(low_prices) == len(close_prices) and len(open_prices) > 0:
+        predictions = []
+        for open_price, high_price, low_price, close_price in zip(open_prices, high_prices, low_prices, close_prices):
+            prediction = predict(model, open_price, high_price, low_price, close_price, selected_model_name)
+            predictions.append(prediction)
+
+        # Membuat DataFrame untuk visualisasi
+        data = pd.DataFrame({
+            "Date": [last_date - timedelta(days=i) for i in range(len(close_prices))][::-1],
+            "Harga Aktual": close_prices,
+            "Harga Prediksi": predictions
+        })
+
+        # Visualisasi menggunakan matplotlib
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.plot(data["Date"], data["Harga Aktual"], label="Harga Aktual", marker='o', color="blue")
+        ax.plot(data["Date"], data["Harga Prediksi"], label="Harga Prediksi", marker='x', color="orange")
+        ax.set_xlabel("Tanggal")
+        ax.set_ylabel("Harga")
+        ax.set_title(f"Visualisasi Prediksi - {selected_model_name}")
+        ax.legend()
+
+        # Tampilkan grafik
+        st.pyplot(fig)
+
+        # Tampilkan data
+        st.write("Data Prediksi:")
+        st.dataframe(data)
+    else:
+        st.error("Jumlah nilai pada input harga tidak sama atau data kosong.")
