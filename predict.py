@@ -3,18 +3,6 @@ import xgboost as xgb
 from xgboost import XGBRegressor
 import streamlit as st
 
-# Konstanta nilai minimum dan maksimum berdasarkan penjelasan
-MIN_VALUE = 784.91
-MAX_VALUE = 2271.54
-
-# Fungsi Normalisasi
-def custom_min_max_scaler(value, min_value=MIN_VALUE, max_value=MAX_VALUE):
-    return 1 - ((value - min_value) / (max_value - min_value))
-
-# Fungsi Denormalisasi
-def denormalize(value, min_value=MIN_VALUE, max_value=MAX_VALUE):
-    return max_value - (value * (max_value - min_value))
-
 # Path ke file CSV model
 MODELS_PATH = {
     "Model XGBoost Default": "models/xgboost_model_default_params.csv",
