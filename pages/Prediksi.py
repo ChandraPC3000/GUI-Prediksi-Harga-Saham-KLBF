@@ -40,6 +40,7 @@ elif selected_model_name == "Model XGBoost Default":
 ''')
 
 # Load model berdasarkan pilihan
+st.write("Model yang dipilih:", selected_model_name)
 model = load_model(selected_model_name)
 
 # Menu input data
