@@ -6,8 +6,7 @@ from predict import load_model, predict
 from datetime import datetime, timedelta
 
 # Load daftar model
-MODELS = ["Model XGBoost Default", "Model XGBoost GridSearch", "Model XGBoost PSO",
-          "Model LSTM Adam", "Model LSTM RMSprop"]
+MODELS = ["Model XGBoost Default", "Model XGBoost GridSearchCV", "Model XGBoost PSO"]
 
 # Halaman Visualisasi Grafik Prediksi
 st.title("Visualisasi Grafik Prediksi Saham Kalbe Farma (KLBF)")
@@ -66,7 +65,7 @@ if st.sidebar.button("Generate Predictions"):
     if len(open_prices) == len(high_prices) == len(low_prices) == len(close_prices) and len(open_prices) > 0:
         predictions = []
         for open_price, high_price, low_price, close_price in zip(open_prices, high_prices, low_prices, close_prices):
-            prediction = predict(model, open_price, high_price, low_price, close_price, selected_model_name)
+            prediction = predict(model, open_price, high_price, low_price, close_price)
             predictions.append(prediction)
 
         # Membuat DataFrame untuk visualisasi
@@ -91,31 +90,5 @@ if st.sidebar.button("Generate Predictions"):
         # Tampilkan data
         st.write("Data Prediksi:")
         st.dataframe(data)
-
-        # Prediksi hingga 2030
-        future_predictions = []
-        future_dates = []
-        last_data = [open_prices[-1], high_prices[-1], low_prices[-1], close_prices[-1]]
-        future_date = last_date
-
-        while future_date.year <= 2030:
-            prediction = predict(model, *last_data, selected_model_name)
-            future_predictions.append(prediction)
-            future_dates.append(future_date + timedelta(days=1))
-            last_data = [last_data[1], last_data[2], last_data[3], prediction]
-            future_date += timedelta(days=1)
-
-        # Tampilkan prediksi masa depan hingga 2030
-        future_df = pd.DataFrame({
-            "Date": future_dates,
-            "Harga Prediksi (Hingga 2030)": future_predictions
-        })
-
-        # Tambahkan ke grafik
-        ax.plot(future_df["Date"], future_df["Harga Prediksi (Hingga 2030)"], label="Prediksi Hingga 2030", linestyle="--", color="green")
-        ax.legend()
-        st.pyplot(fig)
-        st.write("Prediksi Hingga 2030:")
-        st.dataframe(future_df)
     else:
         st.error("Jumlah nilai pada input harga tidak sama atau data kosong.")
