@@ -84,9 +84,6 @@ def load_model(model_name):
     except Exception as e:
         raise ValueError(f"⚠️ Terjadi kesalahan saat membaca model dari {model_path}:\n{str(e)}")
 
-    else:
-        raise ValueError("Model tidak ditemukan atau format tidak didukung.")
-
 def predict(model, open_price, high_price, low_price, close_price):
     """Melakukan prediksi harga saham menggunakan model XGBoost."""
 
