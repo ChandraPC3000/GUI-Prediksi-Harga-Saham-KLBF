@@ -37,38 +37,50 @@ def load_model(model_name):
     st.write(f"🔍 Membaca model dari: {model_path}")
 
     try:
-        # Baca file CSV model
+        # ✅ Baca file CSV model
         model_params = pd.read_csv(model_path)
 
-        # Pastikan file memiliki kolom yang sesuai
+        # ✅ Pastikan file memiliki kolom yang sesuai
         if "Parameter" not in model_params.columns or "Value" not in model_params.columns:
+            st.error(f"⚠️ File {model_path} tidak memiliki kolom 'Parameter' dan 'Value'.")
             raise ValueError(f"⚠️ File {model_path} tidak memiliki kolom 'Parameter' dan 'Value'.")
 
-        # Konversi CSV ke dictionary
+        # ✅ Konversi CSV ke dictionary
         params_dict = model_params.set_index("Parameter")["Value"].to_dict()
 
-        # Konversi tipe data ke float/int sesuai kebutuhan
-        params_dict["max_depth"] = int(float(params_dict.get("max_depth", 6)))
-        params_dict["n_estimators"] = int(float(params_dict.get("n_estimators", 100)))
-        params_dict["min_child_weight"] = float(params_dict.get("min_child_weight", 1))
-        params_dict["gamma"] = float(params_dict.get("gamma", 0))
-        params_dict["reg_lambda"] = float(params_dict.get("reg_lambda", 1))
-        params_dict["learning_rate"] = float(params_dict.get("learning_rate", 0.3))
-        params_dict["subsample"] = float(params_dict.get("subsample", 1))
-        params_dict["colsample_bytree"] = float(params_dict.get("colsample_bytree", 1))
+        # ✅ Konversi tipe data dengan aman
+        try:
+            params_dict["max_depth"] = int(float(params_dict.get("max_depth", 6)))
+            params_dict["n_estimators"] = int(float(params_dict.get("n_estimators", 100)))
+            params_dict["min_child_weight"] = float(params_dict.get("min_child_weight", 1))
+            params_dict["gamma"] = float(params_dict.get("gamma", 0))
+            params_dict["reg_lambda"] = float(params_dict.get("reg_lambda", 1))
+            params_dict["learning_rate"] = float(params_dict.get("learning_rate", 0.3))
+            params_dict["subsample"] = float(params_dict.get("subsample", 1))
+            params_dict["colsample_bytree"] = float(params_dict.get("colsample_bytree", 1))
+        except Exception as param_error:
+            st.error(f"⚠️ Terjadi kesalahan dalam parsing parameter model dari CSV:\n{param_error}")
+            raise ValueError(f"⚠️ Terjadi kesalahan dalam parsing parameter model dari CSV:\n{param_error}")
 
         st.write("🔢 Parameter yang digunakan:", params_dict)
 
         # ✅ Buat model dengan parameter yang telah diperbaiki
         model = XGBRegressor(**params_dict)
 
-        # ✅ Pastikan model sudah dilatih sebelum digunakan
-        train_data = pd.read_csv(TRAIN_DATA_PATH, index_col=0, parse_dates=True)
+        # ✅ Cek apakah dataset latih tersedia
+        try:
+            train_data = pd.read_csv(TRAIN_DATA_PATH, index_col=0, parse_dates=True)
+        except FileNotFoundError:
+            st.error(f"⚠️ Dataset latih tidak ditemukan di: {TRAIN_DATA_PATH}")
+            raise ValueError(f"⚠️ Dataset latih tidak ditemukan di: {TRAIN_DATA_PATH}")
 
-        # Pastikan indeks dalam format datetime
-        train_data.index = pd.to_datetime(train_data.index)
+        # ✅ Pastikan dataset memiliki semua fitur yang dibutuhkan
+        missing_columns = [col for col in FEATURES + [TARGET_COLUMN] if col not in train_data.columns]
+        if missing_columns:
+            st.error(f"⚠️ Dataset latih tidak memiliki kolom berikut: {', '.join(missing_columns)}")
+            raise ValueError(f"⚠️ Dataset latih tidak memiliki kolom berikut: {', '.join(missing_columns)}")
 
-        # Pisahkan fitur dan target berdasarkan data latih yang sudah dibagi sebelumnya
+        # ✅ Pisahkan fitur dan target berdasarkan data latih yang sudah dibagi sebelumnya
         total_data = len(train_data)
         train_size = int(total_data * 0.8)  # 80% training
         test_size = total_data - train_size  # 20% testing
@@ -76,15 +88,9 @@ def load_model(model_name):
         X_train = train_data[FEATURES].iloc[:train_size].copy()
         y_train = train_data[TARGET_COLUMN].iloc[:train_size].copy()
 
-        X_test = train_data[FEATURES].iloc[train_size:].copy()
-        y_test = train_data[TARGET_COLUMN].iloc[train_size:].copy()
-
         st.write(f"✅ Jumlah data total: {total_data}")
         st.write(f"✅ Jumlah data training: {len(X_train)}")
-        st.write(f"✅ Jumlah data testing: {len(X_test)}")
-
-        st.write(f"📅 Tanggal data training: {X_train.index.min().date()} - {X_train.index.max().date()}")
-        st.write(f"📅 Tanggal data testing: {X_test.index.min().date()} - {X_test.index.max().date()}")
+        st.write(f"✅ Jumlah data testing: {test_size}")
 
         # ✅ Latih model dengan dataset latih
         st.write("🔄 Melatih model dengan dataset latih...")
@@ -95,27 +101,5 @@ def load_model(model_name):
         return model
 
     except Exception as e:
+        st.error(f"⚠️ Terjadi kesalahan saat membaca model dari {model_path}:\n{str(e)}")
         raise ValueError(f"⚠️ Terjadi kesalahan saat membaca model dari {model_path}:\n{str(e)}")
-
-def predict(model, open_price, high_price, low_price, close_price):
-    """Melakukan prediksi harga saham dengan model XGBoost."""
-    try:
-        # ✅ Normalisasi input
-        open_price = custom_min_max_scaler(open_price)
-        high_price = custom_min_max_scaler(high_price)
-        low_price = custom_min_max_scaler(low_price)
-        close_price = custom_min_max_scaler(close_price)
-
-        # ✅ Siapkan input data dalam bentuk array
-        input_data = pd.DataFrame([[open_price, high_price, low_price, close_price]], columns=FEATURES[:-1])
-
-        # ✅ Lakukan prediksi dengan model
-        prediction_normalized = model.predict(input_data)[0]
-
-        # ✅ Denormalisasi hasil prediksi
-        prediction_denormalized = denormalize(prediction_normalized)
-
-        return prediction_denormalized
-
-    except Exception as e:
-        raise ValueError(f"⚠️ Terjadi kesalahan saat melakukan prediksi:\n{str(e)}")
