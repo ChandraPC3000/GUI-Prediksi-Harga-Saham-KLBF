@@ -31,10 +31,10 @@ if input_method == "Manual":
 
     try:
         # Konversi input ke array numpy
-        open_prices = np.array([float(x) for x in open_prices.split(",")])
-        high_prices = np.array([float(x) for x in high_prices.split(",")])
-        low_prices = np.array([float(x) for x in low_prices.split(",")])
-        close_prices = np.array([float(x) for x in close_prices.split(",")])
+        open_prices = np.array([float(x.strip()) for x in open_prices.split(",")])
+        high_prices = np.array([float(x.strip()) for x in high_prices.split(",")])
+        low_prices = np.array([float(x.strip()) for x in low_prices.split(",")])
+        close_prices = np.array([float(x.strip()) for x in close_prices.split(",")])
         last_date = datetime.today()
     except ValueError:
         st.error("Pastikan semua nilai input valid dan dipisahkan dengan koma.")
@@ -46,16 +46,30 @@ elif input_method == "Upload CSV":
     if uploaded_file is not None:
         try:
             df = pd.read_csv(uploaded_file)
-            st.write("Data dari File CSV:")
-            st.write(df.head())
 
-            open_prices = df["Open"].values
-            high_prices = df["High"].values
-            low_prices = df["Low"].values
-            close_prices = df["Close"].values
-            last_date = pd.to_datetime(df["Date"].iloc[-1])
-        except KeyError:
-            st.error("Pastikan file CSV memiliki kolom: Date, Open, High, Low, dan Close.")
+            # Cek apakah kolom yang dibutuhkan ada di dalam dataset
+            required_columns = ["Date", "Open", "High", "Low", "Close"]
+            missing_cols = [col for col in required_columns if col not in df.columns]
+            if missing_cols:
+                st.error(f"File CSV harus memiliki kolom: {', '.join(missing_cols)}")
+                open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
+            else:
+                st.write("Data dari File CSV:")
+                st.write(df.head())
+
+                open_prices = df["Open"].values
+                high_prices = df["High"].values
+                low_prices = df["Low"].values
+                close_prices = df["Close"].values
+
+                # Konversi tanggal dengan aman
+                try:
+                    last_date = pd.to_datetime(df["Date"].iloc[-1])
+                except Exception:
+                    st.error("Format tanggal pada file CSV tidak dikenali. Pastikan menggunakan format YYYY-MM-DD atau DD/MM/YYYY.")
+                    last_date = datetime.today()
+        except Exception as e:
+            st.error(f"Terjadi kesalahan saat membaca file CSV: {e}")
             open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
     else:
         open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
@@ -65,7 +79,7 @@ if st.sidebar.button("Generate Predictions"):
     if len(open_prices) == len(high_prices) == len(low_prices) == len(close_prices) and len(open_prices) > 0:
         predictions = []
         for open_price, high_price, low_price, close_price in zip(open_prices, high_prices, low_prices, close_prices):
-            prediction = predict(model, open_price, high_price, low_price, close_price)
+            prediction = predict(model, open_price, high_price, low_price, close_price, selected_model_name)
             predictions.append(prediction)
 
         # Membuat DataFrame untuk visualisasi
