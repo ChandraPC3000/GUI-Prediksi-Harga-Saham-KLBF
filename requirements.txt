@@ -4,3 +4,8 @@ numpy
 pandas
 xgboost
 matplotlib
+streamlit  # Jika menggunakan Streamlit
+pyswarms  # Jika menggunakan PSO
+seaborn  # Jika ingin visualisasi lebih baik
+requests  # Jika mengambil data dari API/GitHub
+pickle5  # Opsional, untuk kompatibilitas pickle
