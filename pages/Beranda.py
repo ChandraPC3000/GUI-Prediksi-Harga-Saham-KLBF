@@ -42,9 +42,9 @@ st.markdown("""
 <div class='boxed-text'>
 Sistem ini memungkinkan pengguna untuk melakukan prediksi harga penutupan saham berdasarkan berbagai parameter historis yang diperoleh dari dataset harga saham harian. Prediksi dilakukan menggunakan beberapa metode Machine Learning, yaitu:
 
-- **XGBoost Default** (model tanpa optimasi parameter)
-- **XGBoost GridSearchCV** (model dengan optimasi hyperparameter menggunakan GridSearchCV)
-- **XGBoost PSO** (model dengan optimasi hyperparameter menggunakan Particle Swarm Optimization)
+- **XGBoost-Default** (model tanpa optimasi parameter)
+- **XGBoost-GridSearchCV** (model dengan optimasi hyperparameter menggunakan GridSearchCV)
+- **XGBoost-PSO** (model dengan optimasi hyperparameter menggunakan Particle Swarm Optimization)
 
 Sistem ini memiliki antarmuka interaktif yang sederhana dan mudah digunakan untuk mendapatkan hasil prediksi secara real-time serta menampilkan visualisasi data dalam bentuk grafik interaktif.
 </div>
