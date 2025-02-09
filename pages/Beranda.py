@@ -1,76 +1,75 @@
 import streamlit as st
 import pandas as pd
 
-# Styling for improved aesthetics
+# Styling for alignment and layout adjustments
 st.markdown("""
 <style>
 .center {
     text-align: center;
-    font-weight: bold;
-    font-size: 24px;
 }
-.subheader {
+.adjusted-left {
+    margin-left: 20%; /* Geser sedikit ke tengah kiri */
+    margin-top: 20px;
+    line-height: 1.8;
     text-align: center;
-    font-size: 18px;
-    color: #555;
 }
-.boxed-text {
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    background-color: #f9f9f9;
-    margin: 20px 0;
-    font-size: 16px;
-    line-height: 1.6;
+.adjusted-right {
+    margin-right: 20%; /* Geser sedikit ke tengah kanan */
+    margin-top: 20px;
+    line-height: 1.8;
+    text-align: center;
 }
-.instructions {
-    background-color: #eef;
-    padding: 10px;
-    border-radius: 10px;
+.space-below {
+    margin-bottom: 5px;
+}
+.space-between {
+    margin-top: 20px; /* Space between NIM and dosen pembimbing */
+}
+.space-name {
+    margin-top: 10px; /* Tambahkan jarak antara judul dan nama */
     line-height: 1.8;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Header
+# Logo placement
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.write(' ')
+
+with col2:
+    st.image('logo.png', width=200,)
+
+with col3:
+    st.write(' ')
+
+# Title and information
 st.markdown('<h1 class="center">Prediksi Harga Penutupan Saham PT Kalbe Farma Tbk Menggunakan Model Extreme Gradient Boosting (XGBoost)</h1>', unsafe_allow_html=True)
+st.markdown('<p class="center space-below">Oleh:</p>', unsafe_allow_html=True)
+st.markdown('<p class="center space-below"><b>Chandra Putra Ciptaningtyas</b></p>', unsafe_allow_html=True)
+st.markdown('<p class="center space-below">NIM. 24050121140106</p>', unsafe_allow_html=True)
 
-# Pengenalan GUI
-st.markdown('<p class="subheader">Sistem ini dirancang untuk memprediksi harga penutupan saham PT Kalbe Farma Tbk (KLBF) menggunakan model Extreme Gradient Boosting (XGBoost).</p>', unsafe_allow_html=True)
+# Additional space between NIM and dosen pembimbing
+st.markdown('<div class="space-between"></div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div class='boxed-text'>
-Sistem ini memungkinkan pengguna untuk melakukan prediksi harga penutupan saham berdasarkan berbagai parameter historis yang diperoleh dari dataset harga saham harian. Prediksi dilakukan menggunakan beberapa metode Machine Learning, yaitu:
+# Display dosen pembimbing information
+col_left, col_right = st.columns([1, 1])
 
-- **XGBoost-Default** (model tanpa optimasi parameter)
-- **XGBoost-GridSearchCV** (model dengan optimasi hyperparameter menggunakan GridSearchCV)
-- **XGBoost-PSO** (model dengan optimasi hyperparameter menggunakan Particle Swarm Optimization)
+with col_left:
+    st.markdown('''
+    <p class="adjusted-left">
+        Dosen Pembimbing 1<br><br>
+        <span><b>Dr. Triastuti Wuryandari, S.Si., M.Si.</b></span><br>
+        <span>NIP. 197109061998032001</span>
+    </p>
+    ''', unsafe_allow_html=True)
 
-Sistem ini memiliki antarmuka interaktif yang sederhana dan mudah digunakan untuk mendapatkan hasil prediksi secara real-time serta menampilkan visualisasi data dalam bentuk grafik interaktif.
-</div>
-""", unsafe_allow_html=True)
-
-# Panduan Penggunaan
-st.markdown("""
-### Panduan Penggunaan
-<div class='instructions'>
-<b>1. Memilih Model</b><br>
-Pengguna dapat memilih salah satu model yang tersedia di menu **Prediksi Saham** untuk melakukan prediksi harga saham berdasarkan model yang dipilih.
-
-<b>2. Menginput Data</b><br>
-- **Input Manual:** Pengguna dapat memasukkan harga **Open, High, Low, dan Close** secara langsung melalui formulir input.
-- **Upload CSV:** Alternatif lain adalah mengunggah file CSV yang berisi data harga saham untuk diprediksi secara otomatis.
-
-<b>3. Menampilkan Hasil Prediksi</b><br>
-Setelah input data dimasukkan, sistem akan melakukan perhitungan dan menampilkan prediksi harga saham di layar. Hasil prediksi ini ditampilkan dalam bentuk tabel dan dapat diunduh untuk analisis lebih lanjut.
-
-<b>4. Visualisasi Data</b><br>
-Pada menu **Visualisasi Data**, pengguna dapat melihat grafik interaktif yang membandingkan harga aktual dengan hasil prediksi dari model yang dipilih.
-</div>
-""", unsafe_allow_html=True)
-
-# Footer
-st.markdown("""
----
-© 2025 - Sistem Prediksi Harga Saham KLBF | Dikembangkan untuk tujuan penelitian dan analisis data.
-""")
+with col_right:
+    st.markdown('''
+    <p class="adjusted-right">
+        Dosen Pembimbing 2<br><br>
+        <span><b>Miftahul Jannah, S.Si., M.Si.</b></span><br>
+        <span>NIP. H.7.199804242023072001</span>
+    </p>
+    ''', unsafe_allow_html=True)
