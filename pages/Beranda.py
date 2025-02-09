@@ -1,77 +1,74 @@
 import streamlit as st
-import pandas as pd
 
-# Styling for improved aesthetics
+# Styling untuk mempercantik tampilan
 st.markdown("""
 <style>
-.center {
-    text-align: center;
-    font-weight: bold;
-    font-size: 24px;
-}
-.subheader {
-    text-align: center;
-    font-size: 18px;
-    color: #555;
-}
-.boxed-text {
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    background-color: #f9f9f9;
-    margin: 20px 0;
-    font-size: 16px;
-    line-height: 1.6;
-}
-.instructions {
-    background-color: #eef;
-    padding: 10px;
-    border-radius: 10px;
-    line-height: 1.8;
-}
+    .title {
+        font-size: 26px;
+        font-weight: bold;
+        text-align: center;
+        color: #2E3B55;
+    }
+    .subtitle {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        color: #2E3B55;
+        margin-top: 10px;
+    }
+    .description {
+        font-size: 16px;
+        text-align: justify;
+        line-height: 1.8;
+        color: #4A4A4A;
+    }
+    .container {
+        background-color: #F8F9FA;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .section {
+        margin-bottom: 20px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Header
-st.image('logo.png', width=150)
-st.markdown('<h1 class="center">Sistem Prediksi Harga Saham KLBF Menggunakan XGBoost</h1>', unsafe_allow_html=True)
+# Judul utama
+st.markdown('<h1 class="title">Prediksi Harga Saham PT Kalbe Farma Tbk</h1>', unsafe_allow_html=True)
+st.markdown('<h2 class="subtitle">Menggunakan Model Extreme Gradient Boosting (XGBoost)</h2>', unsafe_allow_html=True)
 
-# Pengenalan GUI
-st.markdown('<p class="subheader">Sistem ini dirancang untuk memprediksi harga saham PT Kalbe Farma Tbk (KLBF) menggunakan model Extreme Gradient Boosting (XGBoost).</p>', unsafe_allow_html=True)
-
+# Deskripsi aplikasi
+st.markdown('<div class="container section">', unsafe_allow_html=True)
 st.markdown("""
-<div class='boxed-text'>
-Sistem ini memungkinkan pengguna untuk melakukan prediksi harga penutupan saham berdasarkan berbagai parameter historis yang diperoleh dari dataset harga saham harian. Prediksi dilakukan menggunakan beberapa metode Machine Learning, yaitu:
-
-- **XGBoost Default** (model tanpa optimasi parameter)
-- **XGBoost GridSearchCV** (model dengan optimasi hyperparameter menggunakan GridSearchCV)
-- **XGBoost PSO** (model dengan optimasi hyperparameter menggunakan Particle Swarm Optimization)
-
-Sistem ini memiliki antarmuka interaktif yang sederhana dan mudah digunakan untuk mendapatkan hasil prediksi secara real-time serta menampilkan visualisasi data dalam bentuk grafik interaktif.
-</div>
+<p class="description">
+Aplikasi ini dikembangkan untuk membantu analisis harga saham PT Kalbe Farma Tbk (KLBF) dengan menggunakan model **Extreme Gradient Boosting (XGBoost)**. 
+Dengan antarmuka yang interaktif dan mudah digunakan, pengguna dapat melakukan prediksi harga saham berdasarkan data historis 
+serta menganalisis pergerakan harga dengan berbagai metode optimasi, seperti **GridSearchCV dan Particle Swarm Optimization (PSO)**.
+</p>
 """, unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Panduan Penggunaan
+st.markdown('<div class="container section">', unsafe_allow_html=True)
+st.markdown('<h2 class="subtitle">Panduan Penggunaan</h2>', unsafe_allow_html=True)
 st.markdown("""
-### Panduan Penggunaan
-<div class='instructions'>
-<b>1. Memilih Model</b><br>
-Pengguna dapat memilih salah satu model yang tersedia di menu **Prediksi Saham** untuk melakukan prediksi harga saham berdasarkan model yang dipilih.
-
-<b>2. Menginput Data</b><br>
-- **Input Manual:** Pengguna dapat memasukkan harga **Open, High, Low, dan Close** secara langsung melalui formulir input.
-- **Upload CSV:** Alternatif lain adalah mengunggah file CSV yang berisi data harga saham untuk diprediksi secara otomatis.
-
-<b>3. Menampilkan Hasil Prediksi</b><br>
-Setelah input data dimasukkan, sistem akan melakukan perhitungan dan menampilkan prediksi harga saham di layar. Hasil prediksi ini ditampilkan dalam bentuk tabel dan dapat diunduh untuk analisis lebih lanjut.
-
-<b>4. Visualisasi Data</b><br>
-Pada menu **Visualisasi Data**, pengguna dapat melihat grafik interaktif yang membandingkan harga aktual dengan hasil prediksi dari model yang dipilih.
-</div>
+<p class="description">
+1. **Pilih Model Prediksi**: Pada sidebar, pengguna dapat memilih salah satu model prediksi, yaitu **XGBoost Default**, **XGBoost GridSearchCV**, atau **XGBoost PSO**.<br>
+2. **Input Data**: Data dapat dimasukkan secara manual dengan mengisi harga open, high, low, dan close atau dengan mengunggah file CSV.<br>
+3. **Lakukan Prediksi**: Setelah data diinput, klik tombol **"Predict"** untuk mendapatkan hasil prediksi harga penutupan saham.<br>
+4. **Visualisasi Data**: Pengguna dapat melihat grafik pergerakan harga saham dan membandingkan hasil prediksi dengan data aktual pada halaman visualisasi.<br>
+5. **Analisis Lebih Lanjut**: Data hasil prediksi dapat diunduh untuk analisis lebih lanjut.
+</p>
 """, unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Footer
+# Kesimpulan
+st.markdown('<div class="container section">', unsafe_allow_html=True)
 st.markdown("""
----
-© 2025 - Sistem Prediksi Harga Saham KLBF | Dikembangkan untuk tujuan penelitian dan analisis data.
-""")
+<p class="description">
+Aplikasi ini memberikan kemudahan dalam memprediksi harga saham KLBF secara real-time dan membantu pengguna dalam pengambilan keputusan investasi 
+dengan data yang lebih akurat dan berbasis machine learning.
+</p>
+""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
