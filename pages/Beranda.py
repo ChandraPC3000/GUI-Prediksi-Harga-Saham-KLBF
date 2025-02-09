@@ -33,10 +33,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Header
-st.markdown('<h1 class="center">Sistem Prediksi Harga Saham KLBF Menggunakan XGBoost</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="center">Prediksi Harga Penutupan Saham PT Kalbe Farma Tbk Menggunakan Model Extreme Gradient Boosting (XGBoost)</h1>', unsafe_allow_html=True)
 
 # Pengenalan GUI
-st.markdown('<p class="subheader">Sistem ini dirancang untuk memprediksi harga saham PT Kalbe Farma Tbk (KLBF) menggunakan model Extreme Gradient Boosting (XGBoost).</p>', unsafe_allow_html=True)
+st.markdown('<p class="subheader">Sistem ini dirancang untuk memprediksi harga penutupan saham PT Kalbe Farma Tbk (KLBF) menggunakan model Extreme Gradient Boosting (XGBoost).</p>', unsafe_allow_html=True)
 
 st.markdown("""
 <div class='boxed-text'>
