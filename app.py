@@ -70,6 +70,6 @@ with col_right:
     <p class="adjusted-right">
         Dosen Pembimbing 2<br><br>
         <span><b>Miftahul Jannah, S.Si., M.Si.</b></span><br>
-        <span>NIP. H.7.199804242023072001</span>
+        <span>NIP. 199403092024062005</span>
     </p>
     ''', unsafe_allow_html=True)
