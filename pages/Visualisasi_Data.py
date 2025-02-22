@@ -54,20 +54,33 @@ elif input_method == "Upload CSV":
                 st.error(f"File CSV harus memiliki kolom: {', '.join(missing_cols)}")
                 open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
             else:
-                st.write("Data dari File CSV:")
-                st.write(df.head())
+                # Hapus baris yang memiliki nilai non-numerik pada kolom harga
+                numeric_columns = ["Open", "High", "Low", "Close"]
+                for col in numeric_columns:
+                    df[col] = pd.to_numeric(df[col], errors='coerce')
+                
+                # Hapus baris dengan nilai NaN
+                df = df.dropna(subset=numeric_columns)
+                
+                if len(df) == 0:
+                    st.error("Tidak ada data valid setelah membersihkan nilai non-numerik")
+                    open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
+                else:
+                    st.write("Data dari File CSV:")
+                    st.write(df.head())
 
-                open_prices = df["Open"].values
-                high_prices = df["High"].values
-                low_prices = df["Low"].values
-                close_prices = df["Close"].values
+                    open_prices = df["Open"].values
+                    high_prices = df["High"].values
+                    low_prices = df["Low"].values
+                    close_prices = df["Close"].values
 
-                # Konversi tanggal dengan aman
-                try:
-                    last_date = pd.to_datetime(df["Date"].iloc[-1])
-                except Exception:
-                    st.error("Format tanggal pada file CSV tidak dikenali. Pastikan menggunakan format YYYY-MM-DD atau DD/MM/YYYY.")
-                    last_date = datetime.today()
+                    # Konversi tanggal dengan aman
+                    try:
+                        last_date = pd.to_datetime(df["Date"].iloc[-1])
+                    except Exception:
+                        st.warning("Format tanggal pada file CSV tidak dikenali. Menggunakan tanggal hari ini.")
+                        last_date = datetime.today()
+
         except Exception as e:
             st.error(f"Terjadi kesalahan saat membaca file CSV: {e}")
             open_prices, high_prices, low_prices, close_prices, last_date = [], [], [], [], datetime.today()
@@ -78,31 +91,34 @@ elif input_method == "Upload CSV":
 if st.sidebar.button("Generate Predictions"):
     if len(open_prices) == len(high_prices) == len(low_prices) == len(close_prices) and len(open_prices) > 0:
         predictions = []
-        for open_price, high_price, low_price, close_price in zip(open_prices, high_prices, low_prices, close_prices):
-            prediction = predict(model, open_price, high_price, low_price, close_price, selected_model_name)
-            predictions.append(prediction)
+        try:
+            for open_price, high_price, low_price, close_price in zip(open_prices, high_prices, low_prices, close_prices):
+                prediction = predict(model, open_price, high_price, low_price, close_price)
+                predictions.append(prediction)
 
-        # Membuat DataFrame untuk visualisasi
-        data = pd.DataFrame({
-            "Date": [last_date - timedelta(days=i) for i in range(len(close_prices))][::-1],
-            "Harga Aktual": close_prices,
-            "Harga Prediksi": predictions
-        })
+            # Membuat DataFrame untuk visualisasi
+            data = pd.DataFrame({
+                "Date": [last_date - timedelta(days=i) for i in range(len(close_prices))][::-1],
+                "Harga Aktual": close_prices,
+                "Harga Prediksi": predictions
+            })
 
-        # Visualisasi menggunakan matplotlib
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(data["Date"], data["Harga Aktual"], label="Harga Aktual", marker='o', color="blue")
-        ax.plot(data["Date"], data["Harga Prediksi"], label="Harga Prediksi", marker='x', color="orange")
-        ax.set_xlabel("Tanggal")
-        ax.set_ylabel("Harga")
-        ax.set_title(f"Visualisasi Prediksi - {selected_model_name}")
-        ax.legend()
+            # Visualisasi menggunakan matplotlib
+            fig, ax = plt.subplots(figsize=(12, 6))
+            ax.plot(data["Date"], data["Harga Aktual"], label="Harga Aktual", marker='o', color="blue")
+            ax.plot(data["Date"], data["Harga Prediksi"], label="Harga Prediksi", marker='x', color="orange")
+            ax.set_xlabel("Tanggal")
+            ax.set_ylabel("Harga")
+            ax.set_title(f"Visualisasi Prediksi - {selected_model_name}")
+            ax.legend()
 
-        # Tampilkan grafik
-        st.pyplot(fig)
+            # Tampilkan grafik
+            st.pyplot(fig)
 
-        # Tampilkan data
-        st.write("Data Prediksi:")
-        st.dataframe(data)
+            # Tampilkan data
+            st.write("Data Prediksi:")
+            st.dataframe(data)
+        except Exception as e:
+            st.error(f"Terjadi kesalahan saat melakukan prediksi: {str(e)}")
     else:
         st.error("Jumlah nilai pada input harga tidak sama atau data kosong.")
